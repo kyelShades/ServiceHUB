@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "237366612156",
+    "firebase_url": "https://servicehub-98070-default-rtdb.firebaseio.com",
+    "project_id": "servicehub-98070",
+    "storage_bucket": "servicehub-98070.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237366612156:android:02dea05459f7f86e3cc0b9",
+        "android_client_info": {
+          "package_name": "com.example.service_hub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-F7XjYK4nLVfGRjfjtEisnmdSCKKO27w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
