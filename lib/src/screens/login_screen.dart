@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:servicehub/auth.dart';
 import 'package:servicehub/src/screens/signup_screen.dart';
+import 'package:servicehub/src/screens/vendorScreens/vendor_login.dart';
 
 import 'home_screen.dart';
 
@@ -71,27 +72,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Enter your email to sign up for this app',
+                  'Enter your email and password to Log in',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.grey,
                   ),
                 ),
                 SizedBox(height: 15),
                 if (errorMessage != null)
                   Text(
-                    'Enter email and Password to log in',
+                    'Enter correct email and password',
                     style: TextStyle(color: Colors.red),
                   ),
                 SizedBox(height: 10),
                 TextField(
                   controller: _controllerEmail,
                   decoration: InputDecoration(
-                    labelText: 'email@domain.com',
-                    border: OutlineInputBorder(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.black12), // Normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
+                  cursorColor: Colors.blue,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 16),
@@ -99,10 +108,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _controllerPassword,
                   decoration: InputDecoration(
                     labelText: 'password',
-                    border: OutlineInputBorder(
+                    labelStyle: TextStyle(color: Colors.black54),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.black12), // Normal
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.blue,
+
+                      ),
+                    ),
+
                   ),
+                  cursorColor: Colors.blue,
                   obscureText: true,
                 ),
                 SizedBox(height: 5),
@@ -116,7 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                     ),
-                    Text('Keep me signed in'),
+                    Text('Keep me signed in', style: TextStyle(fontWeight: FontWeight.normal)),
+
+
                   ],
                 ),
                 SizedBox(height: 24),
@@ -137,15 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 TextButton(
                   onPressed: () {},
                   child: Text('Forgot Password'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    textStyle: TextStyle(fontWeight: FontWeight.normal)
+
+                  ),
                 ),
+                SizedBox(height: 8),
+                Divider(color: Colors.black12,),
                 SizedBox(height: 10),
-                Divider(),
-                SizedBox(height: 24),
-                Text('Don\'t have an account?'),
+                Text('Don\'t have an account?', style: TextStyle(fontWeight: FontWeight.normal),),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -153,8 +179,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                   child: Text('Create an account'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                      textStyle: TextStyle(fontWeight: FontWeight.normal)
+
+                  ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 8),
+                TextButton(
+
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => VendorLoginScreen()),
+                    );
+                  },
+                  child: Text('Log in to vendor account'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.orangeAccent,
+                      textStyle: TextStyle(fontWeight: FontWeight.normal)
+
+                  ),
+                ),
                 Text(
                   'By clicking continue, you agree to our Terms of Service and Privacy Policy',
                   textAlign: TextAlign.center,

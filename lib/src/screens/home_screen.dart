@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:servicehub/src/screens/profile.dart';
+import 'package:servicehub/src/screens/service_list_screen.dart';
 import 'service_details_screen.dart';
 import 'package:servicehub/src/widget/bottom_nav.dart';
 import 'package:servicehub/src/screens/categories.dart';
@@ -15,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     HomeContent(),
-    CategoriesScreen(), // Ensure CategoriesScreen is added here
+    CategoriesScreen(),
     const Text('Favorite Page', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
     ProfileScreen(),
   ];
@@ -29,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+
       appBar: _selectedIndex == 0
           ? _buildAppBar()
           : null,
@@ -37,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+
       ),
     );
   }
@@ -44,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       toolbarHeight: 70.0,
-      backgroundColor: Colors.white,
+
       elevation: 0,
       automaticallyImplyLeading: false,
       title: Padding(
@@ -97,7 +100,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  String _selectedCategory = ''; // Track the selected category
+
+  void _onCategorySelected(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -106,43 +122,79 @@ class HomeContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  CategoryButton(label: 'IT', isSelected: true),
-                  const SizedBox(width: 8.0),
-                  CategoryButton(label: 'Consulting', isSelected: false),
-                  const SizedBox(width: 8.0),
-                  CategoryButton(label: 'Home Services', isSelected: false),
-                  const SizedBox(width: 8.0),
-                  CategoryButton(label: 'Home Services', isSelected: false),
-                  const SizedBox(width: 8.0),
-                  CategoryButton(label: 'Home Services', isSelected: false),
-                  const SizedBox(width: 8.0),
-                  CategoryButton(label: 'Home Services', isSelected: false),
-                  const SizedBox(width: 8.0),
-                ],
-              ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection("category").snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Error loading categories'),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No categories available'),
+                  );
+                }
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: snapshot.data!.docs.map((doc) {
+                      var category = doc.data() as Map<String, dynamic>;
+                      return GestureDetector(
+                        onTap: () => _onCategorySelected(category['name']),
+                        child: CategoryButton(
+                          label: category['name'],
+                          isSelected: _selectedCategory == category['name'],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 10.0),
-            ServiceCard(
-              imageUrl: 'https://example.com/path-to-service-image.jpg',
-              providerImageUrl: 'https://example.com/path-to-provider-image.jpg',
-              providerName: 'Service Provider',
-              serviceTitle: 'Service Title',
-              servicePrice: '£0.00',
-              reviewsCount: 300,
-              rating: 4.5,
-            ),
-            ServiceCard(
-              imageUrl: 'https://example.com/path-to-service-image.jpg',
-              providerImageUrl: 'https://example.com/path-to-provider-image.jpg',
-              providerName: 'Service Provider',
-              serviceTitle: 'Service Title',
-              servicePrice: '£0.00',
-              reviewsCount: 300,
-              rating: 4.5,
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection("services").snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Error loading services'),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No services available'),
+                  );
+                }
+                var filteredServices = snapshot.data!.docs.where((doc) {
+                  var service = doc.data() as Map<String, dynamic>;
+                  return _selectedCategory.isEmpty || service['category'] == _selectedCategory;
+                }).toList();
+                return Column(
+                  children: filteredServices.map((doc) {
+                    var service = doc.data() as Map<String, dynamic>;
+                    return ServiceCard(
+                      imageUrl: service['imageUrl'],
+                      providerImageUrl: service['providerImageUrl'],
+                      providerName: service['providerName'],
+                      serviceTitle: service['title'],
+                      servicePrice: service['price'],
+                      reviewsCount: service['reviewsCount'],
+                      rating: service['rating'],
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),
@@ -161,15 +213,16 @@ class CategoryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue : Colors.white,
+        color: isSelected ? Colors.blue : Colors.grey[200],
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: isSelected ? Colors.white : Colors.black,
-          fontSize: 16.0,
+          fontSize: 11.0,
         ),
       ),
     );
@@ -225,8 +278,8 @@ class ServiceCard extends StatelessWidget {
                   ),
                 );
               },
-              child: Image.asset(
-                'assets/images/3330179.jpg', // Replace with your image URL
+              child: Image.network(
+                imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
