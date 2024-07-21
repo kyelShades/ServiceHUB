@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:servicehub/src/screens/profile.dart';
@@ -176,6 +178,7 @@ class _HomeContentState extends State<HomeContent> {
                     child: Text('No services available'),
                   );
                 }
+
                 var filteredServices = snapshot.data!.docs.where((doc) {
                   var service = doc.data() as Map<String, dynamic>;
                   return _selectedCategory.isEmpty || service['category'] == _selectedCategory;
@@ -183,14 +186,33 @@ class _HomeContentState extends State<HomeContent> {
                 return Column(
                   children: filteredServices.map((doc) {
                     var service = doc.data() as Map<String, dynamic>;
-                    return ServiceCard(
-                      imageUrl: service['imageUrl'],
-                      providerImageUrl: service['providerImageUrl'],
-                      providerName: service['providerName'],
-                      serviceTitle: service['title'],
-                      servicePrice: service['price'],
-                      reviewsCount: service['reviewsCount'],
-                      rating: service['rating'],
+                    log("service:${doc.data() }");
+                    return InkWell(
+                      onTap: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ServiceDetailsScreen(
+                              imageUrl: service['imageUrl'],
+                              providerImageUrl: service['providerImageUrl'],
+                              providerName: service['providerName'],
+                              serviceTitle: service['title'],
+                              servicePrice: service['price'],
+                              reviewsCount: service['reviewsCount'],
+                              rating: service['rating'],
+                            ),
+                          ),
+                        );
+                      },
+                      child: ServiceCard(
+                        imageUrl: service['imageUrl'],
+                        providerImageUrl: service['providerImageUrl'],
+                        providerName: service['providerName'],
+                        serviceTitle: service['title'],
+                        servicePrice: service['price'],
+                        reviewsCount: service['reviewsCount'],
+                        rating: service['rating'],
+                      ),
                     );
                   }).toList(),
                 );
@@ -236,7 +258,7 @@ class ServiceCard extends StatelessWidget {
   final String serviceTitle;
   final String servicePrice;
   final int reviewsCount;
-  final double rating;
+  final String rating;
 
   ServiceCard({
     required this.imageUrl,
@@ -268,20 +290,9 @@ class ServiceCard extends StatelessWidget {
               ),
               title: Text(providerName),
             ),
-            GestureDetector(
-              onTap: () {
-                // Navigate to service details screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ServiceDetailsScreen(),
-                  ),
-                );
-              },
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
+            Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -290,7 +301,7 @@ class ServiceCard extends StatelessWidget {
                   Row(
                     children: List.generate(5, (index) {
                       return Icon(
-                        index < rating ? Icons.star : Icons.star_border,
+                        index < double.parse(rating) ? Icons.star : Icons.star_border,
                         color: Colors.orange,
                       );
                     }),

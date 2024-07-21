@@ -1,33 +1,52 @@
 import 'package:flutter/material.dart';
 
-class ServiceDetailsScreen extends StatelessWidget {
+class ServiceDetailsScreen extends StatefulWidget {
+  final String imageUrl;
+  final String providerImageUrl;
+  final String providerName;
+  final String serviceTitle;
+  final String servicePrice;
+  final int reviewsCount;
+  final String rating;
+
+  ServiceDetailsScreen({
+    required this.imageUrl,
+    required this.providerImageUrl,
+    required this.providerName,
+    required this.serviceTitle,
+    required this.servicePrice,
+    required this.reviewsCount,
+    required this.rating,
+  });
+  @override
+  State<ServiceDetailsScreen> createState() => _ServiceDetailsScreenState();
+}
+
+class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white, // Set your desired background color here
       appBar: AppBar(
-        title: Text('Service Details'),
+        title: const Text('Service Details'),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: ListView(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         children: [
           Card(
             color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0.0),
-              side: BorderSide(color: Colors.white60, width: 1.0),
+              side: const BorderSide(color: Colors.white60, width: 1.0),
             ),
             elevation: 3.0,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  'assets/images/3330179.jpg', // Replace with service image URL
-                  fit: BoxFit.cover,
-                ),
+                Image.network( '${widget.providerImageUrl}',fit: BoxFit.fitWidth,width: MediaQuery.of(context).size.width,height: 200,),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
@@ -43,22 +62,22 @@ class ServiceDetailsScreen extends StatelessWidget {
                               );
                             }),
                           ),
-                          SizedBox(width: 8.0),
-                          Text('300 Reviews'),
-                          Spacer(),
-                          Icon(Icons.favorite_border),
+                          const SizedBox(width: 8.0),
+                          const Text('300 Reviews'),
+                          const Spacer(),
+                          const Icon(Icons.favorite_border),
                         ],
                       ),
-                      SizedBox(height: 8.0),
-                      Text(
+                      const SizedBox(height: 8.0),
+                      const Text(
                         'Service Title',
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 4.0),
-                      Text(
+                      const SizedBox(height: 4.0),
+                      const Text(
                         '£0.00',
                         style: TextStyle(
                           fontSize: 16.0,
@@ -71,23 +90,23 @@ class ServiceDetailsScreen extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 16.0),
-          Text(
+          const SizedBox(height: 16.0),
+          const Text(
             'Service Descriptions',
             style: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.0),
-          Text(
+          const SizedBox(height: 8.0),
+          const Text(
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ut aliquip ex ea commodo consequat.',
             style: TextStyle(
               fontSize: 16.0,
               color: Colors.black54,
             ),
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -97,18 +116,18 @@ class ServiceDetailsScreen extends StatelessWidget {
               _buildActionButton(Icons.map, 'Map'),
             ],
           ),
-          SizedBox(height: 16.0),
-          Divider(),
-          SizedBox(height: 16.0),
-          Text(
+          const SizedBox(height: 16.0),
+          const Divider(),
+          const SizedBox(height: 16.0),
+          const Text(
             'About Service Provider',
             style: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.0),
-          ListTile(
+          const SizedBox(height: 8.0),
+          const ListTile(
             leading: CircleAvatar(
               backgroundImage: NetworkImage(
                 'https://example.com/path-to-provider-image.jpg', // Replace with provider image URL
@@ -119,9 +138,9 @@ class ServiceDetailsScreen extends StatelessWidget {
               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ut aliquip ex ea commodo consequat.',
             ),
           ),
-          SizedBox(height: 16.0),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const SizedBox(height: 16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
                 Row(
@@ -202,7 +221,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                       expand: false,
                       builder: (context, scrollController) {
                         return Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(20.0),
@@ -218,12 +237,12 @@ class ServiceDetailsScreen extends StatelessWidget {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    CircleAvatar(
+                                    const CircleAvatar(
                                       backgroundImage: NetworkImage(
                                         'https://example.com/path-to-user-image.jpg', // Replace with user image URL
                                       ),
                                     ),
-                                    SizedBox(width: 10.0),
+                                    const SizedBox(width: 10.0),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,8 +256,8 @@ class ServiceDetailsScreen extends StatelessWidget {
                                               );
                                             }),
                                           ),
-                                          SizedBox(height: 4.0),
-                                          Text(
+                                          const SizedBox(height: 4.0),
+                                          const Text(
                                             'Lorem ceaisne ainal ajilak ifns idndkla idofijosi kdfljko. kdflkjfinnslifhha. jklidfjiojos uare jajehrjr.',
                                             style: TextStyle(
                                               fontSize: 14.0,
@@ -260,12 +279,12 @@ class ServiceDetailsScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 'See Reviews',
                 style: TextStyle(
                   fontSize: 16.0,
@@ -292,10 +311,10 @@ class ServiceDetailsScreen extends StatelessWidget {
             size: 30.0,
           ),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.blue,
             fontSize: 14.0,
             fontWeight: FontWeight.bold,
@@ -306,8 +325,4 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: ServiceDetailsScreen(),
-  ));
-}
+

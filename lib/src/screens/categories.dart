@@ -44,6 +44,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   var category = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                  String? categoryId = snapshot.data!.docs[index].id;
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -51,6 +52,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         MaterialPageRoute(
                           builder: (context) => ServiceListScreen(
                             categoryTitle: category['name'],
+                            categoryId: categoryId,
                           ),
                         ),
                       );
