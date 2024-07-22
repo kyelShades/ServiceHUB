@@ -205,13 +205,13 @@ class _HomeContentState extends State<HomeContent> {
                         );
                       },
                       child: ServiceCard(
-                        imageUrl: service['imageUrl'],
-                        providerImageUrl: service['providerImageUrl'],
-                        providerName: service['providerName'],
+                        imageUrl: service['image'],
+                        providerImageUrl: service['providerImageUrl'] ?? "",
+                        providerName: service['providerName'] ?? "",
                         serviceTitle: service['title'],
-                        servicePrice: service['price'],
-                        reviewsCount: service['reviewsCount'],
-                        rating: service['rating'],
+                        servicePrice: service['price'].toString(),
+                        reviewsCount: service['reviewsCount'] ?? 0,
+                        rating: service['rating'] ?? 0.0,
                       ),
                     );
                   }).toList(),
@@ -258,7 +258,7 @@ class ServiceCard extends StatelessWidget {
   final String serviceTitle;
   final String servicePrice;
   final int reviewsCount;
-  final String rating;
+  final double rating;
 
   ServiceCard({
     required this.imageUrl,
@@ -301,7 +301,7 @@ class ServiceCard extends StatelessWidget {
                   Row(
                     children: List.generate(5, (index) {
                       return Icon(
-                        index < double.parse(rating) ? Icons.star : Icons.star_border,
+                        index < rating ? Icons.star : Icons.star_border,
                         color: Colors.orange,
                       );
                     }),
