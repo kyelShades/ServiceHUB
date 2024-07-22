@@ -7,7 +7,6 @@ import 'package:servicehub/src/screens/service_list_screen.dart';
 import 'service_details_screen.dart';
 import 'package:servicehub/src/widget/bottom_nav.dart';
 import 'package:servicehub/src/screens/categories.dart';
-import 'package:servicehub/src/screens/profile.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -33,15 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      appBar: _selectedIndex == 0
-          ? _buildAppBar()
-          : null,
-      body: _widgetOptions.elementAt(_selectedIndex), // Update the body to use _widgetOptions
+      appBar: _selectedIndex == 0 ? _buildAppBar() : null,
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-
       ),
     );
   }
@@ -49,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       toolbarHeight: 70.0,
-
       elevation: 0,
       automaticallyImplyLeading: false,
       title: Padding(
@@ -92,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const CircleAvatar(
               radius: 20.0,
               backgroundImage: NetworkImage(
-                'https://example.com/path-to-your-image.jpg', // Replace with your image URL
+                'https://example.com/path-to-your-image.jpg',
               ),
             ),
           ],
@@ -108,7 +102,7 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  String _selectedCategory = ''; // Track the selected category
+  String _selectedCategory = '';
 
   void _onCategorySelected(String category) {
     setState(() {
@@ -186,18 +180,18 @@ class _HomeContentState extends State<HomeContent> {
                 return Column(
                   children: filteredServices.map((doc) {
                     var service = doc.data() as Map<String, dynamic>;
-                    log("service:${doc.data() }");
+                    log("service:${doc.data()}");
                     return InkWell(
-                      onTap: (){
+                      onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ServiceDetailsScreen(
-                              imageUrl: service['imageUrl'],
+                              imageUrl: service['imageUrl'] ?? '',
                               providerImageUrl: service['providerImageUrl'],
-                              providerName: service['providerName'],
-                              serviceTitle: service['title'],
-                              servicePrice: service['price'],
+                              providerName: service['providerName'] ?? 'Unknown Provider',
+                              serviceTitle: service['title'] ?? 'No Title',
+                              servicePrice: service['price'] ?? 'No Price',
                               reviewsCount: service['reviewsCount'],
                               rating: service['rating'],
                             ),
@@ -205,13 +199,13 @@ class _HomeContentState extends State<HomeContent> {
                         );
                       },
                       child: ServiceCard(
-                        imageUrl: service['imageUrl'],
+                        imageUrl: service['imageUrl'] ?? '',
                         providerImageUrl: service['providerImageUrl'],
-                        providerName: service['providerName'],
-                        serviceTitle: service['title'],
-                        servicePrice: service['price'],
+                        providerName: service['providerName'] ?? 'Unknown Provider',
+                        serviceTitle: service['title'] ?? 'No Title',
+                        servicePrice: service['price'] ?? 'No Price',
                         reviewsCount: service['reviewsCount'],
-                        rating: service['rating'],
+                        rating: service['rating'], providerId: '',
                       ),
                     );
                   }).toList(),
@@ -253,70 +247,78 @@ class CategoryButton extends StatelessWidget {
 
 class ServiceCard extends StatelessWidget {
   final String imageUrl;
-  final String providerImageUrl;
+  final String? providerImageUrl;
   final String providerName;
   final String serviceTitle;
   final String servicePrice;
   final int reviewsCount;
-  final String rating;
+  final double rating; // Change to double
 
   ServiceCard({
     required this.imageUrl,
-    required this.providerImageUrl,
     required this.providerName,
     required this.serviceTitle,
     required this.servicePrice,
-    required this.reviewsCount,
-    required this.rating,
+    this.providerImageUrl,
+    this.reviewsCount = 0, // Provide default value
+    this.rating = 0.0, required String providerId, // Change to double
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero, // Remove any margin around the card
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0.0),
         side: const BorderSide(color: Colors.white60, width: 1.0),
       ),
       elevation: 3.0,
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(providerImageUrl),
-              ),
-              title: Text(providerName),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 10.0), // Adjust internal padding as needed
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(providerImageUrl ?? 'https://example.com/default-provider.jpg'),
             ),
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Row(
-                    children: List.generate(5, (index) {
-                      return Icon(
-                        index < double.parse(rating) ? Icons.star : Icons.star_border,
-                        color: Colors.orange,
-                      );
-                    }),
+            title: Text(providerName.isNotEmpty ? providerName : 'Unknown Provider'),
+          ),
+          Image.network(
+            imageUrl.isNotEmpty ? imageUrl : 'https://example.com/default-image.jpg',
+            width: double.infinity, // Ensure the image takes the full width
+            fit: BoxFit.cover,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Row(
+                        children: List.generate(5, (index) {
+                          return Icon(
+                            index < rating ? Icons.star : Icons.star_border,
+                            color: Colors.orange,
+                          );
+                        }),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text('$reviewsCount Reviews'),
+                      const Spacer(),
+                      const Icon(Icons.favorite_border),
+                    ],
                   ),
-                  const SizedBox(width: 8.0),
-                  Text('$reviewsCount Reviews'),
-                  const Spacer(),
-                  const Icon(Icons.favorite_border),
-                ],
-              ),
+                ),
+                Text(serviceTitle.isNotEmpty ? serviceTitle : 'No Title', style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                Text(servicePrice.isNotEmpty ? servicePrice : 'No Price', style: const TextStyle(fontSize: 16.0, color: Colors.grey)),
+              ],
             ),
-            Text(serviceTitle, style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-            Text(servicePrice, style: const TextStyle(fontSize: 16.0, color: Colors.grey)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

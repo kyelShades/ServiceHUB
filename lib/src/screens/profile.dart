@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20.0),
+            SizedBox(height: 5.0),
 
             // Account Details
             Text('Account Details', style: TextStyle(fontSize: 18.0)),

@@ -64,7 +64,7 @@ class ServiceListScreen extends StatelessWidget {
                       ),
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
-                        
+
                         var service =  snapshot.data!.docs[index].data() as Map<String, dynamic>;
                         log("service:${service }");
                         return InkWell(
@@ -91,7 +91,7 @@ class ServiceListScreen extends StatelessWidget {
                             serviceTitle: service['title'],
                             servicePrice: service['price'],
                             reviewsCount: service['reviewsCount'],
-                            rating: service['rating'],
+                            rating: service['rating'], providerId: '',
                           ),
                         );
                       },
