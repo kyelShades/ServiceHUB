@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,10 +13,12 @@ class ServiceListScreen extends StatefulWidget {
 class _ServiceListScreenState extends State<ServiceListScreen> {
   // List to hold fetched services
   List<Map<String, dynamic>> services = [];
+  late String userId;
 
   @override
   void initState() {
     super.initState();
+    userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user ID
     // Fetch services from Firestore on initialization
     fetchServices();
   }
@@ -23,17 +26,24 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   // Method to fetch services from Firestore
   Future<void> fetchServices() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('services').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('services')
+          .where('vendorId', isEqualTo: userId)
+          .get();
       setState(() {
         services = snapshot.docs.map((doc) {
           // Map Firestore document data to the service format
           return {
-            'image': Icons.fastfood, // Placeholder, replace with actual image URL if available
+            'image': doc['image'], // Use the actual image URL from Firestore
             'name': doc['title'],
             'review': doc['review']?.toDouble() ?? 0.0, // Ensure it's a double
             'reviewCount': doc['reviewCount'] ?? 0,
-            'dateCreated': doc['dateCreated'] ?? 'N/A',
-            'lastUpdate': doc['lastUpdate'] ?? 'N/A',
+            'dateCreated': doc['dateCreated'] != null
+                ? doc['dateCreated'].toDate().toString().split(' ')[0]
+                : 'N/A',
+            'lastUpdate': doc['lastUpdate'] != null
+                ? doc['lastUpdate'].toDate().toString().split(' ')[0]
+                : 'N/A',
           };
         }).toList();
       });
@@ -45,7 +55,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Padding(
         padding: EdgeInsets.all(0.0),
         child: ListView.builder(
@@ -57,7 +66,12 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               elevation: 0.2,
               margin: EdgeInsets.symmetric(vertical: 1.0),
               child: ListTile(
-                leading: Icon(service['image'], size: 50.0),
+                leading: Image.network(
+                  service['image'],
+                  width: 50.0,
+                  height: 50.0,
+                  fit: BoxFit.cover,
+                ),
                 title: Padding(
                   padding: const EdgeInsets.only(left: 20.0),
                   child: Text(service['name'], style: TextStyle(fontSize: 14)),
@@ -101,7 +115,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddServicesScreen()),
+            MaterialPageRoute(builder: (context) => AddServicesScreen()), // Pass vendorId to AddServicesScreen
           );
         },
         child: Icon(Icons.add),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'vendor_login.dart'; // Import the VendorLoginScreen
 
 class VendorRegistrationScreen extends StatefulWidget {
@@ -36,30 +37,42 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
         return;
       }
 
-      // Generate a new document ID automatically
-      DocumentReference docRef = FirebaseFirestore.instance.collection('vendors').doc();
+      try {
+        // Register the user with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
-      await docRef.set({
-        'id': docRef.id,
-        'name': _nameController.text,
-        'email': _emailController.text,
-        'businessName': _businessNameController.text,
-        'phone': _phoneController.text,
-        'password': _passwordController.text, // Ensure to hash the password in a real app
-        'isVendor': true,
-      });
+        // Get the generated vendor ID
+        String vendorId = userCredential.user!.uid;
 
-      // Update user collection to indicate the user is now a vendor
-      await FirebaseFirestore.instance.collection('users').doc(docRef.id).set({
-        'id': docRef.id,
-        'isVendor': true,
-      });
+        // Save vendor data to Firestore
+        await FirebaseFirestore.instance.collection('vendors').doc(vendorId).set({
+          'id': vendorId,
+          'name': _nameController.text,
+          'email': _emailController.text,
+          'businessName': _businessNameController.text,
+          'phone': _phoneController.text,
+          'isVendor': true,
+        });
 
-      // Navigate back to the vendor login screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => VendorLoginScreen()),
-      );
+        // Save vendor data to users collection
+        await FirebaseFirestore.instance.collection('users').doc(vendorId).set({
+          'id': vendorId,
+          'isVendor': true,
+        });
+
+        // Navigate to the vendor login screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => VendorLoginScreen()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to register: $e')),
+        );
+      }
     }
   }
 

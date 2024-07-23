@@ -1,9 +1,8 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:servicehub/src/screens/profile.dart';
-import 'package:servicehub/src/screens/service_list_screen.dart';
+
 import 'service_details_screen.dart';
 import 'package:servicehub/src/widget/bottom_nav.dart';
 import 'package:servicehub/src/screens/categories.dart';
@@ -33,15 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      appBar: _selectedIndex == 0
-          ? _buildAppBar()
-          : null,
+      appBar: _selectedIndex == 0 ? _buildAppBar() : null,
       body: _widgetOptions.elementAt(_selectedIndex), // Update the body to use _widgetOptions
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-
       ),
     );
   }
@@ -49,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       toolbarHeight: 70.0,
-
       elevation: 0,
       automaticallyImplyLeading: false,
       title: Padding(
@@ -89,12 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 8.0),
-            const CircleAvatar(
-              radius: 20.0,
-              backgroundImage: NetworkImage(
-                'https://example.com/path-to-your-image.jpg', // Replace with your image URL
-              ),
-            ),
           ],
         ),
       ),
@@ -120,7 +108,7 @@ class _HomeContentState extends State<HomeContent> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(0.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -181,25 +169,27 @@ class _HomeContentState extends State<HomeContent> {
 
                 var filteredServices = snapshot.data!.docs.where((doc) {
                   var service = doc.data() as Map<String, dynamic>;
-                  return _selectedCategory.isEmpty || service['category'] == _selectedCategory;
+                  return _selectedCategory.isEmpty || service['categoryId'] == _selectedCategory;
                 }).toList();
                 return Column(
                   children: filteredServices.map((doc) {
                     var service = doc.data() as Map<String, dynamic>;
                     log("service:${doc.data() }");
                     return InkWell(
-                      onTap: (){
+                      onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ServiceDetailsScreen(
-                              imageUrl: service['imageUrl'],
-                              providerImageUrl: service['providerImageUrl'],
-                              providerName: service['providerName'],
-                              serviceTitle: service['title'],
-                              servicePrice: service['price'],
-                              reviewsCount: service['reviewsCount'],
-                              rating: service['rating'],
+                                imageUrl: service['image'],
+                                providerImageUrl: service['providerImageUrl'] ?? "",
+                                providerName: service['providerName'] ?? "",
+                                serviceTitle: service['title'],
+                                servicePrice: service['price'].toString(),
+                                reviewsCount: service['reviewsCount'] ?? 0,
+                                rating: service['rating'] ?? 0.0,
+                                description: service['description'],
+                                vendorId: service['vendorId'],
                             ),
                           ),
                         );
@@ -212,6 +202,7 @@ class _HomeContentState extends State<HomeContent> {
                         servicePrice: service['price'].toString(),
                         reviewsCount: service['reviewsCount'] ?? 0,
                         rating: service['rating'] ?? 0.0,
+                        vendorId: service['vendorId'],
                       ),
                     );
                   }).toList(),
@@ -259,6 +250,7 @@ class ServiceCard extends StatelessWidget {
   final String servicePrice;
   final int reviewsCount;
   final double rating;
+  final String vendorId;
 
   ServiceCard({
     required this.imageUrl,
@@ -268,19 +260,21 @@ class ServiceCard extends StatelessWidget {
     required this.servicePrice,
     required this.reviewsCount,
     required this.rating,
+    required this.vendorId,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0), // Add margin around the card
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0.0),
         side: const BorderSide(color: Colors.white60, width: 1.0),
       ),
-      elevation: 3.0,
+      elevation: 0.0,
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(0.0), // Adjust the padding inside the card
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -295,7 +289,7 @@ class ServiceCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // Add margin to the Row
               child: Row(
                 children: [
                   Row(
@@ -306,15 +300,23 @@ class ServiceCard extends StatelessWidget {
                       );
                     }),
                   ),
-                  const SizedBox(width: 8.0),
+                  const SizedBox(width: 5.0),
                   Text('$reviewsCount Reviews'),
                   const Spacer(),
                   const Icon(Icons.favorite_border),
                 ],
               ),
             ),
-            Text(serviceTitle, style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-            Text(servicePrice, style: const TextStyle(fontSize: 16.0, color: Colors.grey)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add padding for text content
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(serviceTitle, style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                  Text(servicePrice, style: const TextStyle(fontSize: 16.0, color: Colors.grey)),
+                ],
+              ),
+            ),
           ],
         ),
       ),

@@ -176,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AddServicesScreen()), // Navigate to AddServicesScreen
+          MaterialPageRoute(builder: (context) => AddServicesScreen()), // Navigate to AddServicesScreen without vendorId
         );
       },
       child: Container(
@@ -253,7 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AddServicesScreen()), // Navigate to AddServicesScreen
+                        MaterialPageRoute(builder: (context) => AddServicesScreen()), // Navigate to AddServicesScreen without vendorId
                       );
                     },
                     child: Icon(Icons.add, color: Colors.white, size: 20), // Add icon
