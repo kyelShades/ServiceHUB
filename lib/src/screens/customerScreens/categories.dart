@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'category_services.dart';
-import 'category_services.dart'; // Import the CategoryServiceScreen
+import 'package:servicehub/src/screens/customerScreens/category_services.dart'; // Import the CategoryServiceScreen
 
 class CategoriesScreen extends StatefulWidget {
   @override
@@ -12,11 +11,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'Categories',
-          style: TextStyle(color: Colors.black, fontSize: 16),
+
         ),
       ),
       body: Padding(
