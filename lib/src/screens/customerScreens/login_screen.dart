@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:servicehub/auth.dart';
-import 'package:servicehub/src/screens/signup_screen.dart';
+import 'package:servicehub/src/screens/customerScreens/signup_screen.dart';
 import 'package:servicehub/src/screens/vendorScreens/vendor_login.dart';
-
 import 'home_screen.dart';
 
 void main() {
@@ -34,6 +33,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _controllerPassword = TextEditingController();
 
   Future<void> signInWithEmailAndPassword() async {
+    // ----Error handling----
+    if (_controllerEmail.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Email is required';
+      });
+      return;
+    }
+
+    if (_controllerPassword.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Password is required';
+      });
+      return;
+    }
+    //---------------ends--------------------
+
     try {
       await Auth().signInWithEmailAndPassword(
         email: _controllerEmail.text,
@@ -45,9 +60,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.code == 'user-not-found'
-            ? 'Account does not exist. Please sign up.'
-            : e.message;
+        if (e.code == 'user-not-found') {
+          errorMessage = 'Incorrect email. Please try again.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Incorrect password. Please try again.';
+        } else {
+          errorMessage = 'Email does not exist';
+        }
       });
     }
   }
@@ -62,29 +81,30 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 80),
-                Text(
-                  'Create an account',
+                const SizedBox(height: 80),
+                const Text(
+                  'Log in',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 8),
+                const Text(
                   'Enter your email and password to Log in',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey,
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 if (errorMessage != null)
                   Text(
-                    'Enter correct email and password',
+                    errorMessage!,
                     style: TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
                   ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextField(
                   controller: _controllerEmail,
                   decoration: InputDecoration(
@@ -103,11 +123,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   cursorColor: Colors.blue,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _controllerPassword,
                   decoration: InputDecoration(
-                    labelText: 'password',
+                    labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.black54),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -116,18 +136,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Colors.blue,
-
                       ),
                     ),
-
                   ),
                   cursorColor: Colors.blue,
                   obscureText: true,
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
                     Checkbox(
+                      activeColor: Colors.blue,
                       value: keepSignedIn,
                       onChanged: (bool? value) {
                         setState(() {
@@ -136,79 +155,63 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     Text('Keep me signed in', style: TextStyle(fontWeight: FontWeight.normal)),
-
-
                   ],
                 ),
-                SizedBox(height: 24),
-
-                SizedBox(height: 1),
+                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: signInWithEmailAndPassword,
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.blue, // foreground (text) color
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue, // foreground (text) color
                       padding: EdgeInsets.symmetric(vertical: 16.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0), // Change the border radius here
                       ),
                     ),
                     child: Text('Login'),
-
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () {},
-                  child: Text('Forgot Password'),
+                  child: const Text('Forgot Password'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.blue,
-                    textStyle: TextStyle(fontWeight: FontWeight.normal)
-
+                    textStyle: TextStyle(fontWeight: FontWeight.normal),
                   ),
                 ),
-                SizedBox(height: 8),
-                Divider(color: Colors.black12,),
-                SizedBox(height: 10),
-                Text('Don\'t have an account?', style: TextStyle(fontWeight: FontWeight.normal),),
+                const SizedBox(height: 8),
+                const Divider(color: Colors.black12),
+                const SizedBox(height: 10),
+                const Text('Don\'t have an account?', style: TextStyle(fontWeight: FontWeight.normal)),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => SignupScreen()),
                     );
                   },
-                  child: Text('Create an account'),
+                  child: const Text('Click to sign up'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.blue,
-                      textStyle: TextStyle(fontWeight: FontWeight.normal)
-
+                    textStyle: TextStyle(fontWeight: FontWeight.normal),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
-
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => VendorLoginScreen()),
                     );
                   },
-                  child: Text('Log in to vendor account'),
+                  child: const Text('Log in to vendor account'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.orangeAccent,
-                      textStyle: TextStyle(fontWeight: FontWeight.normal)
-
+                    textStyle: TextStyle(fontWeight: FontWeight.normal),
                   ),
                 ),
-                Text(
-                  'By clicking continue, you agree to our Terms of Service and Privacy Policy',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
               ],
             ),
           ),

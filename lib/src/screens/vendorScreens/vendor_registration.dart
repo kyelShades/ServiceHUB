@@ -110,10 +110,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Full Name',
+                          labelText: 'Full name',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -135,8 +136,9 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -160,10 +162,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                       TextFormField(
                         controller: _businessNameController,
                         decoration: InputDecoration(
-                          labelText: 'Business Name',
+                          labelText: 'Business name',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -183,10 +186,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                       TextFormField(
                         controller: _phoneController,
                         decoration: InputDecoration(
-                          labelText: 'Phone Number',
+                          labelText: 'Contact',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -212,8 +216,9 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -234,10 +239,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                       TextFormField(
                         controller: _confirmPasswordController,
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
+                          labelText: 'Confirm password',
                           labelStyle: TextStyle(color: Colors.black54),
-                          border: OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12), // Normal
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(

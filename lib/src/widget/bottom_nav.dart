@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:servicehub/src/screens/categories.dart';
+
+import 'package:servicehub/src/screens/customerScreens/categories.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
