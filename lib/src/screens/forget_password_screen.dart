@@ -52,6 +52,13 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 80),
+
+                // Add the image above the title
+                Image.asset(
+                  'assets/sh_icon.png',  // Path to your image asset
+                  height: 100.0,          // Set the height as needed
+                ),
+                SizedBox(height: 20.0),   // Space between the image and the title
                 const Text(
                   'Reset Password',
                   style: TextStyle(

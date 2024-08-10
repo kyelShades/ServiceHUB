@@ -62,11 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         if (e.code == 'user-not-found') {
-          errorMessage = 'Incorrect email. Please try again.';
+          errorMessage = 'Accont does not exist.';
         } else if (e.code == 'wrong-password') {
           errorMessage = 'Incorrect password. Please try again.';
         } else {
-          errorMessage = 'Email does not exist';
+          errorMessage = 'Wrong email or Password';
         }
       });
     }
@@ -83,6 +83,13 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 80),
+
+                // Add the image above the title
+                Image.asset(
+                  'assets/sh_icon.png',  // Path to your image asset
+                  height: 100.0,          // Set the height as needed
+                ),
+                SizedBox(height: 20.0),   // Space between the image and the title
                 const Text(
                   'Log in',
                   style: TextStyle(

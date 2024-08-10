@@ -94,7 +94,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Profile'),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text(
+          'Profile',
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -176,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildAccountButton(
               onPressed: _updateUserDetails,
               text: 'Save Changes',
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
           ],

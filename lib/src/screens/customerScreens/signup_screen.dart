@@ -100,6 +100,13 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               const SizedBox(height: 50.0),
+
+              // Add the image above the title
+              Image.asset(
+                'assets/sh_icon.png',  // Path to your image asset
+                height: 100.0,          // Set the height as needed
+              ),
+              SizedBox(height: 20.0),   // Space between the image and the title
               const Text(
                 'Create an account',
                 style: TextStyle(

@@ -23,8 +23,12 @@ class FavoriteScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           title: Text('Favorite Services', style: TextStyle(color: Colors.black)),
           iconTheme: IconThemeData(color: Colors.black),
-          automaticallyImplyLeading: false, // Removes the back navigation button
-
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new),
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed('/home');
+            },
+          ),
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
