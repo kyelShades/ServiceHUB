@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:servicehub/auth.dart';
 import 'package:servicehub/src/screens/customerScreens/signup_screen.dart';
 import 'package:servicehub/src/screens/vendorScreens/vendor_login.dart';
+import '../forget_password_screen.dart';
 import 'home_screen.dart';
 
 void main() {
@@ -175,7 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => ForgetPasswordScreen()),
+                    );
+                  },
                   child: const Text('Forgot Password'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.blue,

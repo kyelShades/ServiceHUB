@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../forget_password_screen.dart';
 import 'dashboard.dart'; // Import the DashboardScreen
 import 'vendor_registration.dart';
 import '../customerScreens/login_screen.dart';
@@ -174,7 +175,11 @@ class _VendorLoginScreenState extends State<VendorLoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => ForgetPasswordScreen()),
+                    );
+                  },
                   child: const Text('Forgot Password'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.blue,
