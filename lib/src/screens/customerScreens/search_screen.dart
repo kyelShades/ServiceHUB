@@ -76,11 +76,10 @@ class SearchResultsScreen extends StatelessWidget {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('services')
-          .where('category_name_lowercase', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('category_name_lowercase', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .where('title', isEqualTo: "Twinney Designs")
           .get();
 
-      print("Fetched ${snapshot.docs.length} services"); // Debugging
+      print("Fetched ${snapshot.docs.length} services : ${searchQuery}"); // Debugging
 
       return snapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>;
@@ -95,21 +94,27 @@ class SearchResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: fetchServices(searchQuery),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error fetching services'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No services available'));
-        } else {
-          final services = snapshot.data!;
+    return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection("services")
+            .where("title",isGreaterThanOrEqualTo:searchQuery.toLowerCase() )
+            .where('title', isLessThan: '${searchQuery.toLowerCase()}z').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+                child: CircularProgressIndicator(),
+            );
+          }
+
+          final data = snapshot.data?.docs;
+          print("data:${snapshot.data?.docs.length}");
+
+          var userChatData;
+
           return ListView.builder(
-            itemCount: services.length,
+            itemCount: data?.length ?? 0,
             itemBuilder: (context, index) {
-              final service = services[index];
+              final service = data![index].data() as Map<String, dynamic>;
 
               final String imageUrl = service['image'] ?? '';
               final String title = service['title'] ?? 'No Title';
@@ -171,8 +176,10 @@ class SearchResultsScreen extends StatelessWidget {
               );
             },
           );
+
         }
-      },
     );
+
+
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -76,14 +78,17 @@ class FavoriteServiceCard extends StatelessWidget {
 
   Future<Map<String, dynamic>> _fetchVendorDetails(String vendorId) async {
     try {
-      DocumentSnapshot vendorDoc = await FirebaseFirestore.instance
+      QuerySnapshot vendorDoc = await FirebaseFirestore.instance
           .collection('vendors')
-          .doc(vendorId)
+          .where("id",isEqualTo:vendorId)
           .get();
-      if (!vendorDoc.exists) {
+
+      print("Fetched ${vendorId}"); // Debugging
+
+      if (vendorDoc.docs.isEmpty) {
         throw Exception("Vendor not found");
       }
-      return vendorDoc.data() as Map<String, dynamic>;
+      return vendorDoc.docs.first.data() as Map<String, dynamic>;
     } catch (e) {
       throw Exception("Error fetching vendor data: $e");
     }

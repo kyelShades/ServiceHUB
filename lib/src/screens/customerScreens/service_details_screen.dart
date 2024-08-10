@@ -51,7 +51,7 @@ class ServiceDetailsScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return ReviewsBottomSheet(vendorId: vendorId);
+        return ReviewsBottomSheet(serviceId: serviceId,vendorId: vendorId,);
       },
     );
   }
