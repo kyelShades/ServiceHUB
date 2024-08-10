@@ -9,16 +9,16 @@ class AccountDeleteScreen extends StatelessWidget {
 
     if (userId.isNotEmpty) {
       try {
-        // Delete user data from Firestore
-        await FirebaseFirestore.instance.collection('customers').doc(userId).delete();
+        FirebaseAuth.instance.currentUser?.delete().then((_) {
+          print("User account deleted successfully.");
+          // Navigate to the login screen
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => VendorLoginScreen()),
+          );
+        }).catchError((error) {
+          print("Error deleting user: $error");
+        });
 
-        // Delete the user account
-        await FirebaseAuth.instance.currentUser?.delete();
-
-        // Navigate to the login screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => VendorLoginScreen()),
-        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error deleting account: $e')));
       }

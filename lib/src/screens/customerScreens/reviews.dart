@@ -4,8 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ReviewsBottomSheet extends StatefulWidget {
   final String vendorId;
+  final String serviceId;
 
-  const ReviewsBottomSheet({required this.vendorId, Key? key}) : super(key: key);
+  const ReviewsBottomSheet({required this.vendorId,required this.serviceId, Key? key}) : super(key: key);
 
   @override
   _ReviewsBottomSheetState createState() => _ReviewsBottomSheetState();
@@ -41,15 +42,17 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
   }
 
   Stream<List<Map<String, dynamic>>> _fetchReviews() {
+    print("widget.serviceId:${widget.serviceId}");
     return FirebaseFirestore.instance
         .collection('reviews')
-        .where('vendorId', isEqualTo: widget.vendorId)
+        .where('serviceId', isEqualTo: widget.serviceId)
         .snapshots()
         .map((snapshot) =>
         snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList());
   }
-
   void _submitReview() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
     if (_reviewController.text.isEmpty || _rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please provide a rating and a review')),
@@ -59,10 +62,11 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
 
     try {
       await FirebaseFirestore.instance.collection('reviews').add({
-        'serviceId': widget.vendorId,
+        'serviceId': widget.serviceId,
         'userName': _username,
         'comment': _reviewController.text,
         'rating': _rating,
+        'userId': user?.uid,
         'timestamp': FieldValue.serverTimestamp(),
       });
 

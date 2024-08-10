@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Search',
                               border: InputBorder.none,
                             ),
@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          SizedBox(height: 10.0),
+          const SizedBox(height: 10.0),
           Container(
             height: 40.0,
             child: StreamBuilder<QuerySnapshot>(
@@ -485,7 +485,7 @@ class _ServiceCardState extends State<ServiceCard> {
                     children: [
                       Text(widget.serviceTitle, style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
                       Text(widget.servicePrice, style: const TextStyle(fontSize: 16.0, color: Colors.grey)),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),

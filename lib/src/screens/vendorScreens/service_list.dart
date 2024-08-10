@@ -18,7 +18,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   @override
   void initState() {
     super.initState();
-    userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user ID
     // Fetch services from Firestore on initialization
     fetchServices();
   }
@@ -26,24 +25,28 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   // Method to fetch services from Firestore
   Future<void> fetchServices() async {
     try {
+      userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user ID
+      print("userId:${userId}");
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('services')
           .where('vendorId', isEqualTo: userId)
           .get();
       setState(() {
         services = snapshot.docs.map((doc) {
+          print("snapshot.docs:${doc.data()}");
+          var data = doc.data() as Map<String, dynamic>;
+
           // Map Firestore document data to the service format
           return {
-            'image': doc['image'], // Use the actual image URL from Firestore
-            'name': doc['title'],
-            'review': doc['review']?.toDouble() ?? 0.0, // Ensure it's a double
-            'reviewCount': doc['reviewCount'] ?? 0,
-            'reviewCount': doc['reviewCount'] ?? 0,
-            'dateCreated': doc['dateCreated'] != null
-                ? doc['dateCreated'].toDate().toString().split(' ')[0]
+            'image': data['image'], // Use the actual image URL from Firestore
+            'name': data['title'],
+            'review': data['review']?.toDouble() ?? 0.0, // Ensure it's a double
+            'reviewCount': data['reviewCount'] ?? 0,
+            'dateCreated': data['dateCreated'] != null
+                ? data['dateCreated'].toDate().toString().split(' ')[0]
                 : 'N/A',
-            'lastUpdate': doc['lastUpdate'] != null
-                ? doc['lastUpdate'].toDate().toString().split(' ')[0]
+            'lastUpdate': data['lastUpdate'] != null
+                ? data['lastUpdate'].toDate().toString().split(' ')[0]
                 : 'N/A',
           };
         }).toList();
