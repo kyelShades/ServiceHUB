@@ -34,18 +34,15 @@ class ServiceDetailsScreen extends StatelessWidget {
     required this.vendorPhone,
   });
 
-  Future<Map<String, dynamic>> _fetchServiceDetails() async {
+  Future<Map<String, dynamic>> _fetchVendorDetails() async {
     try {
-      if (serviceId.isEmpty) {
-        throw Exception("Service ID is empty");
+      DocumentSnapshot vendorDoc = await FirebaseFirestore.instance.collection('vendors').doc(vendorId).get();
+      if (!vendorDoc.exists) {
+        throw Exception("Vendor not found");
       }
-      DocumentSnapshot serviceDoc = await FirebaseFirestore.instance.collection('services').doc(serviceId).get();
-      if (!serviceDoc.exists) {
-        throw Exception("Service not found");
-      }
-      return serviceDoc.data() as Map<String, dynamic>;
+      return vendorDoc.data() as Map<String, dynamic>;
     } catch (e) {
-      throw Exception("Error fetching service data: $e");
+      throw Exception("Error fetching vendor data: $e");
     }
   }
 
@@ -92,6 +89,29 @@ class ServiceDetailsScreen extends StatelessWidget {
     }
   }
 
+  void _openSocialMedia(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  String _constructSocialMediaUrl(String platform, String username) {
+    switch (platform) {
+      case 'instagram':
+        return 'https://www.instagram.com/$username';
+      case 'facebook':
+        return 'https://www.facebook.com/$username';
+      case 'twitter':
+        return 'https://twitter.com/$username';
+      case 'linkedin':
+        return 'https://www.linkedin.com/in/$username';
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,20 +125,26 @@ class ServiceDetailsScreen extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _fetchServiceDetails(),
-        builder: (context, serviceSnapshot) {
-          if (serviceSnapshot.connectionState == ConnectionState.waiting) {
+        future: _fetchVendorDetails(),
+        builder: (context, vendorSnapshot) {
+          if (vendorSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (serviceSnapshot.hasError) {
-            print("Error: ${serviceSnapshot.error}");
-            return const Center(child: Text('Error loading service details'));
+          if (vendorSnapshot.hasError) {
+            print("Error: ${vendorSnapshot.error}");
+            return const Center(child: Text('Error loading vendor details'));
           }
-          if (!serviceSnapshot.hasData) {
-            return const Center(child: Text('Service details not available'));
+          if (!vendorSnapshot.hasData) {
+            return const Center(child: Text('Vendor details not available'));
           }
 
-          var service = serviceSnapshot.data!;
+          var vendorDetails = vendorSnapshot.data!;
+
+          // Social media usernames
+          String? instagramUsername = vendorDetails['instagram'];
+          String? facebookUsername = vendorDetails['facebook'];
+          String? twitterUsername = vendorDetails['twitter'];
+          String? linkedinUsername = vendorDetails['linkedin'];
 
           return SingleChildScrollView(
             child: Column(
@@ -184,6 +210,56 @@ class ServiceDetailsScreen extends StatelessWidget {
                         style: const TextStyle(fontSize: 16.0),
                       ),
                       const SizedBox(height: 25.0),
+                      if ((instagramUsername != null && instagramUsername.isNotEmpty) ||
+                          (facebookUsername != null && facebookUsername.isNotEmpty) ||
+                          (twitterUsername != null && twitterUsername.isNotEmpty) ||
+                          (linkedinUsername != null && linkedinUsername.isNotEmpty))
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Follow Us',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              children: [
+                                if (instagramUsername != null && instagramUsername.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.camera_alt, color: Colors.pink),
+                                    onPressed: () {
+                                      _openSocialMedia(_constructSocialMediaUrl('instagram', instagramUsername));
+                                    },
+                                  ),
+                                if (facebookUsername != null && facebookUsername.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.facebook, color: Colors.blue),
+                                    onPressed: () {
+                                      _openSocialMedia(_constructSocialMediaUrl('facebook', facebookUsername));
+                                    },
+                                  ),
+                                if (twitterUsername != null && twitterUsername.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.alternate_email, color: Colors.blueAccent),
+                                    onPressed: () {
+                                      _openSocialMedia(_constructSocialMediaUrl('twitter', twitterUsername));
+                                    },
+                                  ),
+                                if (linkedinUsername != null && linkedinUsername.isNotEmpty)
+                                  IconButton(
+                                    icon: Icon(Icons.business, color: Colors.blueGrey),
+                                    onPressed: () {
+                                      _openSocialMedia(_constructSocialMediaUrl('linkedin', linkedinUsername));
+                                    },
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 25.0),
+                          ],
+                        ),
                       const Text(
                         'Service Information',
                         style: TextStyle(
@@ -192,22 +268,9 @@ class ServiceDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8.0),
-                      Text('Contact: ${service['contact']['phone']}'),
-                      Text('Email: ${service['contact']['email']}'),
-                      Text('Location: ${service['location']['address1']}'),
-                      Text('Website: ${service['contact']['website']}'),
-                      const SizedBox(height: 16.0),
-                      const Text(
-                        'Vendor Details',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
+                      Text('Contact: ${vendorDetails['phone']}'),
+                      Text('Email: ${vendorDetails['email']}'),
                       Text('Business Name: $vendorBusinessName'),
-                      Text('Vendor Email: $vendorEmail'),
-                      Text('Vendor Phone: $vendorPhone'),
                       const SizedBox(height: 16.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -217,7 +280,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                               IconButton(
                                 icon: Icon(Icons.call, color: Colors.green),
                                 onPressed: () {
-                                  _makePhoneCall(service['contact']['phone']);
+                                  _makePhoneCall(vendorDetails['phone']);
                                 },
                               ),
                               Text('Call'),
@@ -228,7 +291,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                               IconButton(
                                 icon: Icon(Icons.email, color: Colors.blue),
                                 onPressed: () {
-                                  _sendEmail(service['contact']['email']);
+                                  _sendEmail(vendorDetails['email']);
                                 },
                               ),
                               Text('Email'),
@@ -239,7 +302,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                               IconButton(
                                 icon: Icon(Icons.map, color: Colors.red),
                                 onPressed: () {
-                                  _openMap(service['location']['address1'], service['location']['address2']);
+                                  _openMap(vendorDetails['address1'] ?? '', vendorDetails['address2'] ?? '');
                                 },
                               ),
                               Text('Map'),
@@ -250,7 +313,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                               IconButton(
                                 icon: Icon(Icons.web, color: Colors.orange),
                                 onPressed: () {
-                                  _openWebsite(service['contact']['website']);
+                                  _openWebsite(vendorDetails['website'] ?? '');
                                 },
                               ),
                               Text('Website'),

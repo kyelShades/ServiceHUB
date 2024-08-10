@@ -34,36 +34,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
       VendorProfileScreen(),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text(
-          _selectedIndex == 1 ? 'Your Services' : (_selectedIndex == 2 ? 'Profile' : 'Dashboard'),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return WillPopScope(
+      onWillPop: () async {
+        // Prevent the system back button from navigating back to the login screen
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Text(
+            _selectedIndex == 1 ? 'Your Services' : (_selectedIndex == 2 ? 'Profile' : 'Dashboard'),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
-      ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: 'Your Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        body: _widgetOptions.elementAt(_selectedIndex),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          backgroundColor: Colors.blue,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey[150],
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category),
+              label: 'Your Services',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -141,7 +147,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     );
   }
-
 
   Widget _buildCustomerStats(BuildContext context) {
     return GestureDetector(

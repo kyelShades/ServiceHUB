@@ -18,6 +18,11 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
+  final TextEditingController _instagramController = TextEditingController();
+  final TextEditingController _facebookController = TextEditingController();
+  final TextEditingController _twitterController = TextEditingController();
+  final TextEditingController _linkedinController = TextEditingController();
+
   bool _isLoading = true;
   String? _error;
   String? _profileImageUrl;
@@ -45,6 +50,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             _businessNameController.text = userDoc.get('businessName') ?? '';
             _contactController.text = userDoc.get('phone') ?? '';
             _profileImageUrl = userDoc.get('profileImageUrl') ?? '';
+            _instagramController.text = userDoc.data().toString().contains('instagram') ? userDoc.get('instagram') : '';
+            _facebookController.text = userDoc.data().toString().contains('facebook') ? userDoc.get('facebook') : '';
+            _twitterController.text = userDoc.data().toString().contains('twitter') ? userDoc.get('twitter') : '';
+            _linkedinController.text = userDoc.data().toString().contains('linkedin') ? userDoc.get('linkedin') : '';
           });
         }
       }
@@ -68,6 +77,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
         'businessName': _businessNameController.text,
         'phone': _contactController.text,
         'profileImageUrl': _profileImageUrl,
+        'instagram': _instagramController.text,
+        'facebook': _facebookController.text,
+        'twitter': _twitterController.text,
+        'linkedin': _linkedinController.text,
       }, SetOptions(merge: true));
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully')));
     }
@@ -140,14 +153,23 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             ),
             SizedBox(height: 20.0),
             // Account Details
-            Text('Account Details', style: TextStyle(fontSize: 18.0)),
+            _buildTextField(_usernameController, 'Username', Icons.person),
             SizedBox(height: 10.0),
-            _buildTextField(_usernameController, 'Username'),
+            _buildTextField(_businessNameController, 'Business Name', Icons.business),
             SizedBox(height: 10.0),
-            _buildTextField(_businessNameController, 'Business Name'),
+            _buildTextField(_contactController, 'Contact', Icons.phone),
+            SizedBox(height: 50.0),
+            // Social Media Handles
+            Text('Social Media Handles', style: TextStyle(fontSize: 18.0)),
             SizedBox(height: 10.0),
-            _buildTextField(_contactController, 'Contact'),
-            SizedBox(height: 40.0),
+            _buildTextField(_instagramController, 'Instagram', Icons.camera_alt),
+            SizedBox(height: 10.0),
+            _buildTextField(_facebookController, 'Facebook', Icons.facebook),
+            SizedBox(height: 10.0),
+            _buildTextField(_twitterController, 'Twitter', Icons.alternate_email),
+            SizedBox(height: 10.0),
+            _buildTextField(_linkedinController, 'LinkedIn', Icons.business),
+            SizedBox(height: 50.0),
             // Your Account
             Text('Your Account', style: TextStyle(fontSize: 18.0)),
             SizedBox(height: 10.0),
@@ -167,7 +189,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             _buildAccountButton(
               onPressed: _updateUserDetails,
               text: 'Save Changes',
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
           ],
@@ -176,12 +198,13 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
     );
   }
 
-  TextField _buildTextField(TextEditingController controller, String hint) {
+  TextField _buildTextField(TextEditingController controller, String hint, IconData icon) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey),
+        prefixIcon: Icon(icon, color: Colors.grey),
         border: UnderlineInputBorder(),
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.black12),

@@ -49,7 +49,7 @@ class _VendorAccountDeleteScreenState extends State<VendorAccountDeleteScreen> {
 
         await batch.commit();
 
-        // Step 3: Delete vendor profile
+        // Step 3: Delete the vendor profile from Firestore
         await FirebaseFirestore.instance.collection('vendors').doc(userId).delete();
 
         // Step 4: Delete Firebase Auth account
@@ -126,7 +126,8 @@ class _VendorAccountDeleteScreenState extends State<VendorAccountDeleteScreen> {
                   onPressed: _confirmDeleteAccount,
                   child: Text('Delete Account'),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
                     padding: EdgeInsets.symmetric(vertical: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),

@@ -38,6 +38,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             'name': doc['title'],
             'review': doc['review']?.toDouble() ?? 0.0, // Ensure it's a double
             'reviewCount': doc['reviewCount'] ?? 0,
+            'reviewCount': doc['reviewCount'] ?? 0,
             'dateCreated': doc['dateCreated'] != null
                 ? doc['dateCreated'].toDate().toString().split(' ')[0]
                 : 'N/A',

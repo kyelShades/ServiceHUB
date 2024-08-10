@@ -56,6 +56,10 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
           'phone': _phoneController.text,
           'isVendor': true,
           'profileImageUrl': '', // Add the profileImageUrl field with an empty string
+          'instagram': '', // Empty field for Instagram
+          'facebook': '', // Empty field for Facebook
+          'twitter': '', // Empty field for Twitter
+          'linkedin': '', // Empty field for LinkedIn
         });
 
         // Save vendor data to users collection
@@ -76,7 +80,6 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -297,13 +300,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  'By clicking Register, you agree to our Terms of Service and Privacy Policy',
+                  'By clicking Register, you agree to our Terms & Conditions',
+                  style: TextStyle(color: Colors.grey),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
                 ),
+                SizedBox(height: 50),
               ],
             ),
           ),
