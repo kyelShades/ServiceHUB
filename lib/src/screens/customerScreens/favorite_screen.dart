@@ -12,48 +12,57 @@ class FavoriteScreen extends StatelessWidget {
       return Center(child: Text('You need to be logged in to view favorites'));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Favorite Services', style: TextStyle(color: Colors.black)),
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('favorites')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error loading favorites'));
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No favorite services'));
-          }
+    return WillPopScope(
+      onWillPop: () async {
+        // Define the behavior when the back button is pressed
+        Navigator.of(context).pushReplacementNamed('/home'); // Replace this with your desired route
+        return false; // Prevent the default back button behavior
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text('Favorite Services', style: TextStyle(color: Colors.black)),
+          iconTheme: IconThemeData(color: Colors.black),
+          automaticallyImplyLeading: false, // Removes the back navigation button
 
-          var favoriteServices = snapshot.data!.docs.map((doc) {
-            var favorite = doc.data() as Map<String, dynamic>;
-            return FavoriteServiceCard(
-              favorite: favorite,
-              onRemove: () async {
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.uid)
-                    .collection('favorites')
-                    .doc(doc.id)
-                    .delete();
-              },
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('favorites')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error loading favorites'));
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No favorite services'));
+            }
+
+            var favoriteServices = snapshot.data!.docs.map((doc) {
+              var favorite = doc.data() as Map<String, dynamic>;
+              return FavoriteServiceCard(
+                favorite: favorite,
+                onRemove: () async {
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .collection('favorites')
+                      .doc(doc.id)
+                      .delete();
+                },
+              );
+            }).toList();
+
+            return ListView(
+              children: favoriteServices,
             );
-          }).toList();
-
-          return ListView(
-            children: favoriteServices,
-          );
-        },
+          },
+        ),
       ),
     );
   }

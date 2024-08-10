@@ -101,6 +101,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
         final vendorData = snapshot.data!.data() as Map<String, dynamic>;
         final profileImageUrl = vendorData['profileImageUrl'] ?? 'https://example.com/path-to-your-image.jpg';
+
+        // Extract the first name from the full name
+        final fullName = vendorData['name'] ?? '';
+        final firstName = fullName.split(' ')[0]; // Take the first part of the name
+
         return Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
@@ -125,7 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome, ${vendorData['name']}',
+                    'Hi, $firstName',
                     style: TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -136,6 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     );
   }
+
 
   Widget _buildCustomerStats(BuildContext context) {
     return GestureDetector(

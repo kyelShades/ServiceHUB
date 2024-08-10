@@ -55,6 +55,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
           'businessName': _businessNameController.text,
           'phone': _phoneController.text,
           'isVendor': true,
+          'profileImageUrl': '', // Add the profileImageUrl field with an empty string
         });
 
         // Save vendor data to users collection
@@ -75,6 +76,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

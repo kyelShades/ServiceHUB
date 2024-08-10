@@ -23,25 +23,39 @@ class _VendorAccountDeleteScreenState extends State<VendorAccountDeleteScreen> {
       String userId = user?.uid ?? '';
 
       if (userId.isNotEmpty) {
-        // Delete all services associated with the vendor
+        // Step 1: Delete all services associated with the vendor
         QuerySnapshot servicesSnapshot = await FirebaseFirestore.instance
             .collection('services')
             .where('vendorId', isEqualTo: userId)
             .get();
 
         WriteBatch batch = FirebaseFirestore.instance.batch();
-        for (QueryDocumentSnapshot doc in servicesSnapshot.docs) {
-          batch.delete(doc.reference);
+
+        for (QueryDocumentSnapshot serviceDoc in servicesSnapshot.docs) {
+          // Step 2: Delete all reviews associated with each service
+          QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
+              .collection('services')
+              .doc(serviceDoc.id)
+              .collection('reviews')
+              .get();
+
+          for (QueryDocumentSnapshot reviewDoc in reviewsSnapshot.docs) {
+            batch.delete(reviewDoc.reference);
+          }
+
+          // Delete the service itself
+          batch.delete(serviceDoc.reference);
         }
+
         await batch.commit();
 
-        // Delete vendor profile
+        // Step 3: Delete vendor profile
         await FirebaseFirestore.instance.collection('vendors').doc(userId).delete();
 
-        // Delete Firebase Auth account
+        // Step 4: Delete Firebase Auth account
         await user?.delete();
 
-        // Navigate to Vendor Login Screen
+        // Step 5: Navigate to Vendor Login Screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => VendorLoginScreen()),
         );

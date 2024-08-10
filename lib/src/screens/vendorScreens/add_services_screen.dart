@@ -157,7 +157,7 @@ class _AddServicesScreenState extends State<AddServicesScreen> {
         'location': {
           'address1': address1Controller.text,
           'address2': address2Controller.text,
-          'country': selectedCountry ?? '',
+          'country': selectedCountry ?? '', // Add the selected country ID
           'country_name': selectedCountryName ?? '', // Include country name in the Firestore document
         },
         'image': imageUrl,
@@ -166,7 +166,14 @@ class _AddServicesScreenState extends State<AddServicesScreen> {
       };
 
       try {
-        await _firestore.collection('services').add(serviceData);
+        // Add the service data to the 'services' collection
+        DocumentReference serviceRef = await _firestore.collection('services').add(serviceData);
+
+        // Update the category document to include the service ID
+        await _firestore.collection('category').doc(selectedCategory).update({
+          'services': FieldValue.arrayUnion([serviceRef.id]), // Add the service ID to the 'services' array field
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service added successfully")));
         _clearForm();
       } catch (e) {
@@ -174,6 +181,7 @@ class _AddServicesScreenState extends State<AddServicesScreen> {
       }
     }
   }
+
 
   // Clear the form fields
   void _clearForm() {

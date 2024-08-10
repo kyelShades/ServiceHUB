@@ -45,18 +45,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: _selectedIndex == 0 ? _buildAppBar() : null,
-      body: _selectedIndex == 0
-          ? HomeContent(
-        filters: _filters,
-        selectedCategoryId: _selectedCategoryId,
-      )
-          : _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: () async {
+        // Define what should happen when the back button is pressed
+        if (_selectedIndex == 0) {
+          return true; // Allow back navigation if on the main HomeContent screen
+        } else {
+          setState(() {
+            _selectedIndex = 0; // Navigate to the main HomeContent screen instead
+          });
+          return false; // Prevent default back navigation
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: _selectedIndex == 0 ? _buildAppBar() : null,
+        body: _selectedIndex == 0
+            ? HomeContent(
+          filters: _filters,
+          selectedCategoryId: _selectedCategoryId,
+        )
+            : _widgetOptions.elementAt(_selectedIndex),
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }
@@ -189,9 +202,7 @@ class _HomeContentState extends State<HomeContent> {
               stream: FirebaseFirestore.instance.collection("services").snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading services'));
@@ -210,10 +221,11 @@ class _HomeContentState extends State<HomeContent> {
                       (widget.filters['location'] == null || service['location'] == widget.filters['location']) &&
                       (widget.filters['rating'] == null || service['rating'] >= widget.filters['rating']);
                 }).toList();
+
                 return Column(
                   children: filteredServices.map((doc) {
                     var service = doc.data() as Map<String, dynamic>;
-                    log("service:${doc.data()}");
+
                     return FutureBuilder<DocumentSnapshot>(
                       future: FirebaseFirestore.instance.collection('vendors').doc(service['vendorId']).get(),
                       builder: (context, vendorSnapshot) {
@@ -221,13 +233,19 @@ class _HomeContentState extends State<HomeContent> {
                           return const Center(child: CircularProgressIndicator());
                         }
                         if (vendorSnapshot.hasError) {
+                          log('Error loading vendor data: ${vendorSnapshot.error}');
                           return const Center(child: Text('Error loading vendor data'));
                         }
-                        if (!vendorSnapshot.hasData) {
+                        if (!vendorSnapshot.hasData || !vendorSnapshot.data!.exists) {
+                          log('Vendor data not available for vendorId: ${service['vendorId']}');
                           return const Center(child: Text('Vendor data not available'));
                         }
 
                         var vendorDetails = vendorSnapshot.data!.data() as Map<String, dynamic>;
+                        String vendorBusinessName = vendorDetails['businessName'] ?? 'N/A';
+                        String vendorEmail = vendorDetails['email'] ?? 'N/A';
+                        String vendorPhone = vendorDetails['phone'] ?? 'N/A';
+                        String profileImageUrl = vendorDetails['profileImageUrl'] ?? 'https://example.com/default-avatar.png'; // Use default if not available
 
                         return InkWell(
                           onTap: () {
@@ -236,8 +254,8 @@ class _HomeContentState extends State<HomeContent> {
                               MaterialPageRoute(
                                 builder: (context) => ServiceDetailsScreen(
                                   imageUrl: service['image'],
-                                  providerImageUrl: service['providerImageUrl'] ?? "",
-                                  providerName: service['providerName'] ?? "",
+                                  providerImageUrl: profileImageUrl, // Use the vendor's profile image URL
+                                  providerName: vendorDetails['name'] ?? "",
                                   serviceTitle: service['title'],
                                   servicePrice: service['price'].toString(),
                                   reviewsCount: service['reviewsCount'] ?? 0,
@@ -245,9 +263,9 @@ class _HomeContentState extends State<HomeContent> {
                                   description: service['description'],
                                   vendorId: service['vendorId'],
                                   serviceId: doc.id,
-                                  vendorBusinessName: vendorDetails['businessName'] ?? '',
-                                  vendorEmail: vendorDetails['email'] ?? '',
-                                  vendorPhone: vendorDetails['phone'] ?? '',
+                                  vendorBusinessName: vendorBusinessName,
+                                  vendorEmail: vendorEmail,
+                                  vendorPhone: vendorPhone,
                                 ),
                               ),
                             );
@@ -255,16 +273,16 @@ class _HomeContentState extends State<HomeContent> {
                           child: ServiceCard(
                             serviceId: doc.id,
                             imageUrl: service['image'],
-                            providerImageUrl: service['providerImageUrl'] ?? "",
+                            providerImageUrl: profileImageUrl, // Use the vendor's profile image URL
                             providerName: vendorDetails['name'] ?? "",
                             serviceTitle: service['title'],
                             servicePrice: service['price'].toString(),
                             reviewsCount: service['reviewsCount'] ?? 0,
                             rating: service['rating'] ?? 0.0,
                             vendorId: service['vendorId'],
-                            vendorBusinessName: vendorDetails['businessName'] ?? '',
-                            vendorEmail: vendorDetails['email'] ?? '',
-                            vendorPhone: vendorDetails['phone'] ?? '',
+                            vendorBusinessName: vendorBusinessName,
+                            vendorEmail: vendorEmail,
+                            vendorPhone: vendorPhone,
                           ),
                         );
                       },
