@@ -6,7 +6,7 @@ class ReviewsBottomSheet extends StatefulWidget {
   final String vendorId;
   final String serviceId;
 
-  const ReviewsBottomSheet({required this.vendorId,required this.serviceId, Key? key}) : super(key: key);
+  const ReviewsBottomSheet({required this.vendorId, required this.serviceId, Key? key}) : super(key: key);
 
   @override
   _ReviewsBottomSheetState createState() => _ReviewsBottomSheetState();
@@ -14,7 +14,7 @@ class ReviewsBottomSheet extends StatefulWidget {
 
 class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
   final TextEditingController _reviewController = TextEditingController();
-  int _rating = 0;
+  double _rating = 0.0;
   String _username = 'Anonymous';
   User? _currentUser;
 
@@ -42,7 +42,6 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
   }
 
   Stream<List<Map<String, dynamic>>> _fetchReviews() {
-    print("widget.serviceId:${widget.serviceId}");
     return FirebaseFirestore.instance
         .collection('reviews')
         .where('serviceId', isEqualTo: widget.serviceId)
@@ -50,10 +49,11 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
         .map((snapshot) =>
         snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList());
   }
-  void _submitReview() async {
+
+  Future<void> _submitReview() async {
     User? user = FirebaseAuth.instance.currentUser;
 
-    if (_reviewController.text.isEmpty || _rating == 0) {
+    if (_reviewController.text.isEmpty || _rating == 0.0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please provide a rating and a review')),
       );
@@ -61,34 +61,49 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
     }
 
     try {
+      // Round the rating to two decimal places
+      double roundedRating = double.parse((_rating).toStringAsFixed(2));
+
+      // Add the new review to the reviews collection
       await FirebaseFirestore.instance.collection('reviews').add({
         'serviceId': widget.serviceId,
         'userName': _username,
         'comment': _reviewController.text,
-        'rating': _rating,
+        'rating': roundedRating,
         'userId': user?.uid,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Update the vendor document with new rating and review count
-      DocumentReference vendorRef = FirebaseFirestore.instance.collection('vendors').doc(widget.vendorId);
+      // Update the corresponding service document with the new average rating and reviews count
+      DocumentReference serviceRef = FirebaseFirestore.instance.collection('services').doc(widget.serviceId);
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot vendorSnapshot = await transaction.get(vendorRef);
-        if (vendorSnapshot.exists) {
-          int newReviewsCount = (vendorSnapshot.get('reviewsCount') ?? 0) + 1;
-          double currentRating = (vendorSnapshot.get('rating') ?? 0.0) as double;
-          double newRating = ((currentRating * (newReviewsCount - 1)) + _rating) / newReviewsCount;
+        DocumentSnapshot serviceSnapshot = await transaction.get(serviceRef);
+        if (serviceSnapshot.exists) {
+          // Initialize reviewsCount and rating if they don't exist
+          int currentReviewsCount = (serviceSnapshot.data() as Map<String, dynamic>)['reviewsCount'] ?? 0;
+          double currentRating = (serviceSnapshot.data() as Map<String, dynamic>)['rating'] ?? 0.0;
 
-          transaction.update(vendorRef, {
+          // Calculate new rating and increment review count, also rounding to two decimal places
+          int newReviewsCount = currentReviewsCount + 1;
+          double newRating = double.parse((((currentRating * currentReviewsCount) + roundedRating) / newReviewsCount).toStringAsFixed(2));
+
+          // Update the service document
+          transaction.update(serviceRef, {
             'reviewsCount': newReviewsCount,
             'rating': newRating,
+          });
+        } else {
+          // If the service document doesn't exist, create it with the necessary fields
+          transaction.set(serviceRef, {
+            'reviewsCount': 1,
+            'rating': roundedRating,
           });
         }
       });
 
       _reviewController.clear();
       setState(() {
-        _rating = 0;
+        _rating = 0.0;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,6 +115,8 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
       );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -174,9 +191,9 @@ class _ReviewsBottomSheetState extends State<ReviewsBottomSheet> {
                     onPressed: () {
                       setState(() {
                         if (_rating == index + 1) {
-                          _rating = 0; // Deselect all stars if the current star is tapped again
+                          _rating = 0.0; // Deselect all stars if the current star is tapped again
                         } else {
-                          _rating = index + 1; // Otherwise, update the rating to the selected star
+                          _rating = (index + 1).toDouble(); // Otherwise, update the rating to the selected star
                         }
                       });
                     },
