@@ -59,10 +59,18 @@ class _CategoryServiceScreenState extends State<CategoryServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(widget.categoryTitle),
+        title: Text(
+          widget.categoryTitle,
+          style: TextStyle(color: Colors.black),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black), // Custom back icon
+          onPressed: () {
+            Navigator.pop(context); // Go back to the previous screen
+          },
+        ),
       ),
       body: services.isEmpty
           ? Center(child: CircularProgressIndicator())
@@ -88,20 +96,25 @@ class _CategoryServiceScreenState extends State<CategoryServiceScreen> {
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Center(
                     child: CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          (loadingProgress.expectedTotalBytes ??
+                              1)
                           : null,
                     ),
                   );
                 },
-                errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.error),
               )
                   : Icon(Icons.image, size: 50),
-              title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(title,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -121,7 +134,8 @@ class _CategoryServiceScreenState extends State<CategoryServiceScreen> {
                       Row(
                         children: [
                           Text('\$${price.toString()}'),
-                          SizedBox(width: 20), // Add some space between price and favorite icon
+                          SizedBox(
+                              width: 20), // Add some space between price and favorite icon
                           Icon(Icons.favorite_border),
                         ],
                       ),
@@ -138,16 +152,19 @@ class _CategoryServiceScreenState extends State<CategoryServiceScreen> {
                   MaterialPageRoute(
                     builder: (context) => ServiceDetailsScreen(
                       imageUrl: imageUrl,
-                      providerImageUrl: service['providerImageUrl'] ?? '',
+                      providerImageUrl:
+                      service['providerImageUrl'] ?? '',
                       providerName: service['providerName'] ?? '',
                       serviceTitle: title,
                       servicePrice: price.toString(),
                       reviewsCount: reviewsCount,
                       rating: rating,
-                      description: service['description'] ?? 'No Description',
+                      description:
+                      service['description'] ?? 'No Description',
                       vendorId: service['vendorId'],
                       serviceId: service['id'],
-                      vendorBusinessName: vendorDetails['businessName'] ?? '',
+                      vendorBusinessName:
+                      vendorDetails['businessName'] ?? '',
                       vendorEmail: vendorDetails['email'] ?? '',
                       vendorPhone: vendorDetails['phone'] ?? '',
                     ),

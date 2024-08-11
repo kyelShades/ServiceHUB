@@ -76,11 +76,9 @@ class SearchResultsScreen extends StatelessWidget {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('services')
-          .where('category_name_lowercase', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('category_name_lowercase', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .where('title', isGreaterThanOrEqualTo: query)
+          .where('title', isLessThanOrEqualTo: query + '\uf8ff')
           .get();
-
-      print("Fetched ${snapshot.docs.length} services"); // Debugging
 
       return snapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>;
@@ -90,6 +88,23 @@ class SearchResultsScreen extends StatelessWidget {
     } catch (e) {
       print("Error fetching services: $e");
       return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchVendorDetails(String vendorId) async {
+    try {
+      DocumentSnapshot vendorDoc = await FirebaseFirestore.instance
+          .collection('vendors')
+          .doc(vendorId)
+          .get();
+      if (vendorDoc.exists) {
+        return vendorDoc.data() as Map<String, dynamic>;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print("Error fetching vendor details: $e");
+      return {};
     }
   }
 
@@ -117,57 +132,75 @@ class SearchResultsScreen extends StatelessWidget {
               final double rating = service['rating']?.toDouble() ?? 0.0;
               final double price = service['price']?.toDouble() ?? 0.0;
 
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
-                child: ListTile(
-                  contentPadding: EdgeInsets.all(10),
-                  leading: imageUrl.isNotEmpty
-                      ? Image.network(imageUrl, width: 100, height: 100, fit: BoxFit.cover)
-                      : Icon(Icons.image, size: 50),
-                  title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: List.generate(5, (i) {
-                          return Icon(
-                            i < rating ? Icons.star : Icons.star_border,
-                            color: Colors.orange,
-                            size: 15,
-                          );
-                        }),
-                      ),
-                      Text('$reviewsCount Reviews'),
-                      SizedBox(height: 4), // Add some space before the price
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return FutureBuilder<Map<String, dynamic>>(
+                future: fetchVendorDetails(service['vendorId']),
+                builder: (context, vendorSnapshot) {
+                  if (vendorSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (vendorSnapshot.hasError || !vendorSnapshot.hasData) {
+                    return ListTile(
+                      title: Text('Error loading vendor details'),
+                    );
+                  }
+
+                  var vendorDetails = vendorSnapshot.data!;
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(10),
+                      leading: imageUrl.isNotEmpty
+                          ? Image.network(imageUrl, width: 100, height: 100, fit: BoxFit.cover)
+                          : Icon(Icons.image, size: 50),
+                      title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('\$${price.toString()}'),
-                          Icon(Icons.favorite_border),
+                          Row(
+                            children: List.generate(5, (i) {
+                              return Icon(
+                                i < rating ? Icons.star : Icons.star_border,
+                                color: Colors.orange,
+                                size: 15,
+                              );
+                            }),
+                          ),
+                          Text('$reviewsCount Reviews'),
+                          SizedBox(height: 4), // Add some space before the price
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('\$${price.toString()}'),
+                              Icon(Icons.favorite_border),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ServiceDetailsScreen(
-                          imageUrl: imageUrl,
-                          providerImageUrl: service['providerImageUrl'] ?? '',
-                          providerName: service['providerName'] ?? '',
-                          serviceTitle: title,
-                          servicePrice: price.toString(),
-                          reviewsCount: reviewsCount,
-                          rating: rating,
-                          description: service['description'] ?? 'No Description',
-                          vendorId: service['vendorId'],
-                          serviceId: service['serviceId'], vendorBusinessName: '', vendorEmail: '', vendorPhone: '',
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ServiceDetailsScreen(
+                              imageUrl: imageUrl,
+                              providerImageUrl: vendorDetails['profileImageUrl'] ?? '',
+                              providerName: vendorDetails['name'] ?? '',
+                              serviceTitle: title,
+                              servicePrice: price.toString(),
+                              reviewsCount: reviewsCount,
+                              rating: rating,
+                              description: service['description'] ?? 'No Description',
+                              vendorId: service['vendorId'],
+                              serviceId: service['serviceId'],
+                              vendorBusinessName: vendorDetails['businessName'] ?? '',
+                              vendorEmail: vendorDetails['email'] ?? '',
+                              vendorPhone: vendorDetails['phone'] ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
               );
             },
           );

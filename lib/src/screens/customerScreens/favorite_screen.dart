@@ -80,21 +80,23 @@ class FavoriteServiceCard extends StatelessWidget {
     }
   }
 
+  Future<Map<String, dynamic>> _fetchServiceDetails(String serviceId) async {
+    try {
+      DocumentSnapshot serviceDoc = await FirebaseFirestore.instance
+          .collection('services')
+          .doc(serviceId)
+          .get();
+      if (!serviceDoc.exists) {
+        throw Exception("Service not found");
+      }
+      return serviceDoc.data() as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception("Error fetching service data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String imageUrl = favorite['imageUrl'] ?? '';
-    final String title = favorite['serviceTitle'] ?? 'No Title';
-    final int reviewsCount = favorite['reviewsCount'] ?? 0;
-    final double rating = favorite['rating'] is int
-        ? (favorite['rating'] as int).toDouble()
-        : favorite['rating'] is String
-        ? double.tryParse(favorite['rating']) ?? 0.0
-        : favorite['rating'] ?? 0.0;
-    final double price = favorite['servicePrice'] is int
-        ? (favorite['servicePrice'] as int).toDouble()
-        : favorite['servicePrice'] is String
-        ? double.tryParse(favorite['servicePrice']) ?? 0.0
-        : favorite['servicePrice'] ?? 0.0;
     final String serviceId = favorite['serviceId'] ?? '';
 
     return Card(
@@ -102,17 +104,17 @@ class FavoriteServiceCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       child: ListTile(
         contentPadding: EdgeInsets.all(10),
-        leading: imageUrl.isNotEmpty
-            ? Image.network(imageUrl, width: 100, height: 100, fit: BoxFit.cover)
+        leading: favorite['imageUrl'] != null
+            ? Image.network(favorite['imageUrl'], width: 100, height: 100, fit: BoxFit.cover)
             : Icon(Icons.image, size: 50),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(favorite['serviceTitle'] ?? 'No Title', style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: List.generate(5, (i) {
                 return Icon(
-                  i < rating ? Icons.star : Icons.star_border,
+                  i < (favorite['rating'] ?? 0) ? Icons.star : Icons.star_border,
                   color: Colors.orange,
                   size: 15,
                 );
@@ -122,10 +124,10 @@ class FavoriteServiceCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('$reviewsCount Reviews'),
+                Text('${favorite['reviewsCount'] ?? 0} Reviews'),
                 Row(
                   children: [
-                    Text('\$${price.toString()}'),
+                    Text('\$${(favorite['servicePrice'] ?? 0).toString()}'),
                     SizedBox(width: 20), // Add some space between price and remove icon
                     IconButton(
                       icon: Icon(Icons.delete, color: Colors.red),
@@ -139,32 +141,33 @@ class FavoriteServiceCard extends StatelessWidget {
         ),
         onTap: () async {
           try {
-            // Fetch vendor details
-            var vendor = await _fetchVendorDetails(favorite['vendorId'] ?? '');
+            // Fetch the service and vendor details
+            var serviceDetails = await _fetchServiceDetails(serviceId);
+            var vendorDetails = await _fetchVendorDetails(serviceDetails['vendorId'] ?? '');
 
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => ServiceDetailsScreen(
-                  imageUrl: imageUrl,
-                  providerImageUrl: favorite['providerImageUrl'] ?? '',
-                  providerName: favorite['providerName'] ?? '',
-                  serviceTitle: title,
-                  servicePrice: price.toString(),
-                  reviewsCount: reviewsCount,
-                  rating: rating,
-                  description: favorite['description'] ?? 'No Description',
-                  vendorId: favorite['vendorId'] ?? '',
+                  imageUrl: serviceDetails['image'] ?? '',
+                  providerImageUrl: vendorDetails['profileImageUrl'] ?? '',
+                  providerName: vendorDetails['name'] ?? 'Unknown Provider',
+                  serviceTitle: serviceDetails['title'] ?? 'No Title',
+                  servicePrice: serviceDetails['price'].toString(),
+                  reviewsCount: serviceDetails['reviewsCount'] ?? 0,
+                  rating: serviceDetails['rating'] ?? 0.0,
+                  description: serviceDetails['description'] ?? 'No Description',
+                  vendorId: serviceDetails['vendorId'] ?? '',
                   serviceId: serviceId,
-                  vendorBusinessName: vendor['businessName'] ?? '',
-                  vendorEmail: vendor['email'] ?? '',
-                  vendorPhone: vendor['phone'] ?? '',
+                  vendorBusinessName: vendorDetails['businessName'] ?? 'Unknown Business',
+                  vendorEmail: vendorDetails['email'] ?? 'No Email Available',
+                  vendorPhone: vendorDetails['phone'] ?? 'No Phone Number Available',
                 ),
               ),
             );
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error fetching vendor details: $e')),
+              SnackBar(content: Text('Error loading service details: $e')),
             );
           }
         },

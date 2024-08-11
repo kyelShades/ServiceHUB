@@ -236,7 +236,7 @@ class _HomeContentState extends State<HomeContent> {
                               MaterialPageRoute(
                                 builder: (context) => ServiceDetailsScreen(
                                   imageUrl: service['image'],
-                                  providerImageUrl: service['providerImageUrl'] ?? "",
+                                  providerImageUrl: vendorDetails['profileImageUrl'] ?? "",
                                   providerName: service['providerName'] ?? "",
                                   serviceTitle: service['title'],
                                   servicePrice: service['price'].toString(),
@@ -255,7 +255,7 @@ class _HomeContentState extends State<HomeContent> {
                           child: ServiceCard(
                             serviceId: doc.id,
                             imageUrl: service['image'],
-                            providerImageUrl: service['providerImageUrl'] ?? "",
+                            providerImageUrl: vendorDetails['profileImageUrl'] ?? "",
                             providerName: vendorDetails['name'] ?? "",
                             serviceTitle: service['title'],
                             servicePrice: service['price'].toString(),
