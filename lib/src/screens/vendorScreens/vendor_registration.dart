@@ -47,7 +47,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
         // Get the generated vendor ID
         String vendorId = userCredential.user!.uid;
 
-        // Save vendor data to Firestore
+        // Save vendor data to Firestore with additional fields
         await FirebaseFirestore.instance.collection('vendors').doc(vendorId).set({
           'id': vendorId,
           'name': _nameController.text,
@@ -55,6 +55,11 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
           'businessName': _businessNameController.text,
           'phone': _phoneController.text,
           'isVendor': true,
+          'profileImageUrl': '', // Default value or empty string
+          'facebook': '', // Default value or empty string
+          'instagram': '', // Default value or empty string
+          'linkedin': '', // Default value or empty string
+          'twitter': '', // Default value or empty string
         });
 
         // Save vendor data to users collection
@@ -114,7 +119,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -138,7 +143,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -166,7 +171,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -190,7 +195,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -218,7 +223,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -243,7 +248,7 @@ class _VendorRegistrationScreenState extends State<VendorRegistrationScreen> {
                           labelStyle: TextStyle(color: Colors.black54),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.black12), // Normal
+                            borderSide: BorderSide(color: Colors.black12),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(

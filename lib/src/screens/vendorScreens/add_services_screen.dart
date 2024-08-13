@@ -276,9 +276,9 @@ class _AddServicesScreenState extends State<AddServicesScreen> {
     children: [
       Text('Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       SizedBox(height: 10.0),
-      _buildTextField(address1Controller, 'Address', Icons.location_on),
+      _buildTextField(address1Controller, 'House No, street, town', Icons.location_on),
       SizedBox(height: 10.0),
-      _buildTextField(address2Controller, 'Post code', Icons.location_on),
+      _buildTextField(address2Controller, 'Post code/GPS Address', Icons.location_on),
       SizedBox(height: 10.0),
       _buildDropdownField('Country', countryItems, (value) {
         setState(() {

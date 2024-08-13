@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 import 'service_details_screen.dart';
 
 class SearchPage extends StatefulWidget {
@@ -14,6 +16,12 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String? selectedCategory;
+  double? minPrice;
+  double? maxPrice;
+  String? location;
+  bool nearMe = false;
+  String? selectedRatingOrder;
 
   @override
   void initState() {
@@ -33,6 +41,254 @@ class _SearchPageState extends State<SearchPage> {
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text;
+    });
+  }
+
+  void _openFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Filter Services'),
+          content: FutureBuilder<List<String>>(
+            future: fetchCategories(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error fetching categories'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No categories available'));
+              } else {
+                List<String> categories = snapshot.data!;
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Category Dropdown
+                      DropdownButtonFormField<String>(
+                        value: selectedCategory,
+                        items: categories.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedCategory = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Category',
+                          labelStyle: TextStyle(color: Colors.black54),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                        dropdownColor: Colors.white,
+                      ),
+                      SizedBox(height: 16.0),
+
+                      // Price Range
+                      Text('Price Range'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Min',
+                                labelStyle: TextStyle(color: Colors.black54),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide(color: Colors.black12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  minPrice = double.tryParse(value);
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 16.0),
+                          Expanded(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Max',
+                                labelStyle: TextStyle(color: Colors.black54),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide(color: Colors.black12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  maxPrice = double.tryParse(value);
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16.0),
+
+                      // Location
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Location',
+                          labelStyle: TextStyle(color: Colors.black54),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            location = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 16.0),
+
+                      // Near Me Checkbox
+                      CheckboxListTile(
+                        title: Text('Near Me'),
+                        value: nearMe,
+                        onChanged: (value) {
+                          setState(() {
+                            nearMe = value ?? false;
+                          });
+                        },
+                        controlAffinity: ListTileControlAffinity.leading,
+                        activeColor: Colors.blue,
+                      ),
+                      SizedBox(height: 16.0),
+
+                      // Rating Order
+                      DropdownButtonFormField<String>(
+                        value: selectedRatingOrder,
+                        items: [
+                          DropdownMenuItem(
+                            child: Text("Most rated"),
+                            value: "desc",
+                          ),
+                          DropdownMenuItem(
+                            child: Text("Less rated"),
+                            value: "asc",
+                          ),
+                        ],
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedRatingOrder = newValue;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Rating Order',
+                          labelStyle: TextStyle(color: Colors.black54),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.black12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                        dropdownColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _applyFilters();
+              },
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<List<String>> fetchCategories() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('category')
+          .get();
+      return snapshot.docs.map((doc) => doc['name'] as String).toList();
+    } catch (e) {
+      print('Error fetching categories: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchServices(String query) async {
+    if (query.isEmpty) return [];
+
+    try {
+      Query queryRef = FirebaseFirestore.instance.collection('services');
+
+      // Apply category filter
+      if (selectedCategory != null && selectedCategory!.isNotEmpty) {
+        queryRef = queryRef.where('category_name', isEqualTo: selectedCategory);
+      }
+
+      // Apply rating order
+      if (selectedRatingOrder != null) {
+        queryRef = queryRef.orderBy('rating', descending: selectedRatingOrder == "desc");
+      }
+
+      QuerySnapshot snapshot = await queryRef.get();
+
+      return snapshot.docs.map((doc) {
+        var data = doc.data() as Map<String, dynamic>;
+        data['serviceId'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print("Error fetching services: $e");
+      return [];
+    }
+  }
+
+  void _applyFilters() {
+    setState(() {
+      // Trigger a new search with the selected filters
     });
   }
 
@@ -60,53 +316,29 @@ class _SearchPageState extends State<SearchPage> {
             contentPadding: EdgeInsets.symmetric(horizontal: 15.0),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: _openFilterDialog,
+          ),
+        ],
       ),
-      body: SearchResultsScreen(searchQuery: _searchQuery),
+      body: SearchResultsScreen(
+        searchQuery: _searchQuery,
+        fetchServices: fetchServices, // Pass the fetchServices method
+      ),
     );
   }
 }
 
 class SearchResultsScreen extends StatelessWidget {
   final String searchQuery;
+  final Future<List<Map<String, dynamic>>> Function(String) fetchServices;
 
-  SearchResultsScreen({required this.searchQuery});
-
-  Future<List<Map<String, dynamic>>> fetchServices(String query) async {
-    if (query.isEmpty) return [];
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('services')
-          .where('title', isGreaterThanOrEqualTo: query)
-          .where('title', isLessThanOrEqualTo: query + '\uf8ff')
-          .get();
-
-      return snapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        data['serviceId'] = doc.id; // Add the document ID to the data
-        return data;
-      }).toList();
-    } catch (e) {
-      print("Error fetching services: $e");
-      return [];
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchVendorDetails(String vendorId) async {
-    try {
-      DocumentSnapshot vendorDoc = await FirebaseFirestore.instance
-          .collection('vendors')
-          .doc(vendorId)
-          .get();
-      if (vendorDoc.exists) {
-        return vendorDoc.data() as Map<String, dynamic>;
-      } else {
-        return {};
-      }
-    } catch (e) {
-      print("Error fetching vendor details: $e");
-      return {};
-    }
-  }
+  SearchResultsScreen({
+    required this.searchQuery,
+    required this.fetchServices,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -132,19 +364,16 @@ class SearchResultsScreen extends StatelessWidget {
               final double rating = service['rating']?.toDouble() ?? 0.0;
               final double price = service['price']?.toDouble() ?? 0.0;
 
-              return FutureBuilder<Map<String, dynamic>>(
-                future: fetchVendorDetails(service['vendorId']),
-                builder: (context, vendorSnapshot) {
-                  if (vendorSnapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (vendorSnapshot.hasError || !vendorSnapshot.hasData) {
-                    return ListTile(
-                      title: Text('Error loading vendor details'),
-                    );
-                  }
+              return StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .collection('favorites')
+                    .doc(service['serviceId'])
+                    .snapshots(),
+                builder: (context, favoriteSnapshot) {
+                  bool isFavorite = favoriteSnapshot.data?.exists ?? false;
 
-                  var vendorDetails = vendorSnapshot.data!;
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
                     child: ListTile(
@@ -171,7 +400,35 @@ class SearchResultsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('\$${price.toString()}'),
-                              Icon(Icons.favorite_border),
+                              IconButton(
+                                icon: Icon(
+                                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                                  color: isFavorite ? Colors.red : null,
+                                ),
+                                onPressed: () async {
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user != null) {
+                                    final favoriteRef = FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(user.uid)
+                                        .collection('favorites')
+                                        .doc(service['serviceId']);
+
+                                    if (isFavorite) {
+                                      await favoriteRef.delete();
+                                    } else {
+                                      await favoriteRef.set({
+                                        'serviceId': service['serviceId'],
+                                        'imageUrl': imageUrl,
+                                        'title': title,
+                                        'price': price,
+                                        'reviewsCount': reviewsCount,
+                                        'rating': rating,
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
                             ],
                           ),
                         ],
@@ -182,8 +439,8 @@ class SearchResultsScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => ServiceDetailsScreen(
                               imageUrl: imageUrl,
-                              providerImageUrl: vendorDetails['profileImageUrl'] ?? '',
-                              providerName: vendorDetails['name'] ?? '',
+                              providerImageUrl: '', // You can add provider details if needed
+                              providerName: '', // You can add provider details if needed
                               serviceTitle: title,
                               servicePrice: price.toString(),
                               reviewsCount: reviewsCount,
@@ -191,9 +448,9 @@ class SearchResultsScreen extends StatelessWidget {
                               description: service['description'] ?? 'No Description',
                               vendorId: service['vendorId'],
                               serviceId: service['serviceId'],
-                              vendorBusinessName: vendorDetails['businessName'] ?? '',
-                              vendorEmail: vendorDetails['email'] ?? '',
-                              vendorPhone: vendorDetails['phone'] ?? '',
+                              vendorBusinessName: '', // You can add provider details if needed
+                              vendorEmail: '', // You can add provider details if needed
+                              vendorPhone: '', // You can add provider details if needed
                             ),
                           ),
                         );

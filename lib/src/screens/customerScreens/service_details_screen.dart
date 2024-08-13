@@ -140,7 +140,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8.0),
                       Text(
-                        servicePrice,
+                        '\$' + servicePrice, // Corrected concatenation
                         style: const TextStyle(
                           fontSize: 20.0,
                           color: Colors.green,
@@ -164,7 +164,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                             onPressed: () => _showReviews(context),
                             child: const Text('See reviews'),
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
                               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                             ),
                           ),
